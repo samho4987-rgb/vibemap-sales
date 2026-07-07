@@ -74,6 +74,9 @@ body { padding-top: 70px; line-height: 1.6; }
 .login-link-sm { font-size: 0.8rem; color: var(--accent); text-decoration: none; font-weight: 600; }
 .login-footer-links { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); }
 .login-footer-links a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.btn-kakao { width: 100%; padding: 14px; font-weight: 700; background: #FEE500; color: #191919; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-kakao:disabled { opacity: 0.6; cursor: default; }
+.kakao-icon { font-size: 1.1rem; }
 
 /* Checkout */
 .checkout-wrapper { padding: 80px 24px; display: flex; justify-content: center; }
@@ -104,7 +107,8 @@ body { padding-top: 70px; line-height: 1.6; }
 .mypage-card { background: white; border: 1px solid var(--line); border-radius: 12px; padding: 32px; box-shadow: var(--shadow-sm); }
 .card-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 24px; }
 .plan-desc { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
-.badge-status { padding: 6px 12px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; background: #dcfce7; color: var(--success); height: fit-content; }
+.badge-status { padding: 6px 12px; border-radius: 50px; font-size: 0.85rem; font-weight: 700; background: #e2e8f0; color: var(--muted); height: fit-content; }
+.badge-status.active { background: #dcfce7; color: var(--success); }
 .plan-detail-row { display: flex; gap: 48px; }
 .plan-detail .label { font-size: 0.85rem; color: var(--muted); display: block; }
 .plan-detail .value { font-size: 1.1rem; font-weight: 700; }

@@ -5,25 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>바이브 프롭테크 솔루션 — 로그인</title>
   <link rel="stylesheet" href="assets/style.css">
+  <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"></script>
 </head>
 <body class="bg-light login-body">
   <div class="login-container">
     <div class="login-box">
       <a href="index.html" class="login-logo">VIBE <span>PropTech</span></a>
       <h2>소장님 환영합니다</h2>
-      <p class="login-desc">바이브 라이선스 관리 및 대시보드 서비스를 위해 로그인해 주세요.</p>
-      <form onsubmit="event.preventDefault(); window.location.href='mypage.html';">
-        <div class="field"><label for="username">아이디 (이메일)</label><input type="email" id="username" required placeholder="example@naver.com"></div>
-        <div class="field">
-          <div class="label-row"><label for="password">비밀번호</label><a href="#" class="login-link-sm">비밀번호 찾기</a></div>
-          <input type="password" id="password" required placeholder="••••••••">
-        </div>
-        <button type="submit" class="btn-submit" style="margin-top: 12px;">로그인</button>
-      </form>
+      <p class="login-desc">카카오 계정으로 로그인하면 구독 및 라이선스 정보를 확인하실 수 있습니다.</p>
+
+      <button type="button" id="kakaoLoginBtn" class="btn-kakao">
+        <span class="kakao-icon">💬</span> 카카오로 로그인
+      </button>
+
+      <p id="loginMessage" class="form-message" role="status"></p>
+
       <div class="login-footer-links">
         <span>아직 계정이 없으신가요?</span> <a href="index.html#apply-form">솔루션 신청</a>
       </div>
     </div>
   </div>
+  <script src="assets/app.js"></script>
 </body>
 </html>

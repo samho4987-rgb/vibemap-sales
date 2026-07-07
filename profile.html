@@ -11,33 +11,22 @@
   <div class="container mypage-wrapper">
     <aside class="mypage-sidebar">
       <div class="profile-box">
-        <div class="avatar">홍</div>
-        <div class="profile-info"><strong>홍길동 소장님</strong><span>hong@example.com</span></div>
+        <div class="avatar" id="sidebarAvatar">-</div>
+        <div class="profile-info"><strong id="sidebarName">-</strong><span id="sidebarLoginId">-</span></div>
       </div>
       <ul class="mypage-menu">
         <li><a href="mypage.html">🎁 구독 및 라이선스 관리</a></li>
         <li><a href="profile.html" class="active">⚙️ 내 정보 수정</a></li>
       </ul>
-      <div class="mypage-logout"><a href="index.html">로그아웃</a></div>
+      <div class="mypage-logout"><a href="#" id="logoutLink">로그아웃</a></div>
     </aside>
     <main class="mypage-content">
       <h2 class="mypage-title">개인정보 및 설정</h2>
-      <div class="mypage-card">
-        <h3 class="profile-section-title">프로필 설정</h3>
-        <div class="profile-avatar-zone">
-          <div class="avatar large-avatar">홍</div>
-          <div class="avatar-action-buttons"><button class="btn-outline btn-sm">사진 변경</button></div>
-        </div>
-        <form style="margin-top: 32px;" onsubmit="event.preventDefault(); alert('저장되었습니다.');">
-          <div class="form-row">
-            <div class="field"><label>성함</label><input type="text" value="홍길동" required></div>
-            <div class="field"><label>전화번호</label><input type="tel" value="010-1234-5678" required></div>
-          </div>
-          <div class="field"><label>이메일</label><input type="email" value="hong@example.com" required></div>
-          <button type="submit" class="btn-primary" style="margin-top: 12px; padding: 12px 24px;">변경사항 저장</button>
-        </form>
+      <div id="profile-portal" class="mypage-card">
+        <p class="loading">불러오는 중입니다...</p>
       </div>
     </main>
   </div>
+  <script src="assets/app.js"></script>
 </body>
 </html>
