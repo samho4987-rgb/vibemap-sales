@@ -147,8 +147,7 @@ if (checkoutSummary) {
 }
 
 // ── 카카오 로그인(OAuth) / 이메일 회원가입·로그인 공통 ─────────────────
-// TODO: 카카오 개발자센터에서 발급받은 REST API 키로 교체 (JavaScript 키와는 다른 값)
-const KAKAO_REST_API_KEY = "REPLACE_WITH_KAKAO_REST_API_KEY";
+const KAKAO_REST_API_KEY = "a032304d564482473fd3164c22d2bf1d";
 const KAKAO_REDIRECT_URI = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, "")}kakao-callback.html`;
 
 const PORTAL_TOKEN_KEY = "portalToken";
