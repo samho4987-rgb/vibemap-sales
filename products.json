@@ -1,0 +1,23 @@
+[
+  {
+    "key": "app1_pro",
+    "name": "프로 매물장",
+    "price": "월 5,000원",
+    "description": "중개사무소용 매물 관리 프로그램. 매물 등록, 고객 관리, 문자 발송까지 한 번에.",
+    "status": "available"
+  },
+  {
+    "key": "app2_map",
+    "name": "바이브맵 (지도 뷰어)",
+    "price": "월 5,000원",
+    "description": "지도 위에서 매물을 한눈에 보고 필터링하는 지도 스타일 매물 뷰어.",
+    "status": "available"
+  },
+  {
+    "key": "app3_crawler",
+    "name": "바이브맵 크롤러",
+    "price": "월 5,000원",
+    "description": "네이버 부동산 매물을 자동으로 수집해 지도에 반영하는 크롤링 도구.",
+    "status": "available"
+  }
+]
