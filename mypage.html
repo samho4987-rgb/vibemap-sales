@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>바이브 프롭테크 솔루션 — 마이페이지</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="bg-light">
+  <nav class="navbar"><div class="container nav-container"><a href="index.html" class="nav-logo">VIBE <span>PropTech</span></a></div></nav>
+  <div class="container mypage-wrapper">
+    <aside class="mypage-sidebar">
+      <div class="profile-box">
+        <div class="avatar">홍</div>
+        <div class="profile-info"><strong>홍길동 소장님</strong><span>hong@example.com</span></div>
+      </div>
+      <ul class="mypage-menu">
+        <li><a href="mypage.html" class="active">🎁 구독 및 라이선스 관리</a></li>
+        <li><a href="profile.html">⚙️ 내 정보 수정</a></li>
+      </ul>
+      <div class="mypage-logout"><a href="index.html">로그아웃</a></div>
+    </aside>
+    <main class="mypage-content">
+      <h2 class="mypage-title">구독 및 라이선스 관리</h2>
+      <div class="mypage-card">
+        <div class="card-header">
+          <div><h3>바이브 지도 대시보드 & AI 매매가</h3><p class="plan-desc">프리미엄 라이선스 (월간)</p></div>
+          <span class="badge-status active">이용 중</span>
+        </div>
+        <div class="card-body">
+          <div class="plan-detail-row">
+            <div class="plan-detail"><span class="label">다음 결제일</span><span class="value">2026년 8월 15일</span></div>
+            <div class="plan-detail"><span class="label">결제 금액</span><span class="value">149,000원 / 월</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mypage-card" style="margin-top: 24px;">
+        <h3>내 라이선스 키 (License Key)</h3>
+        <p class="text-muted" style="margin-top: 8px; font-size: 0.95rem;">다운로드하신 프로그램 실행 후 아래 키를 입력하시면 정품 인증이 완료됩니다.</p>
+        <div class="license-input-group">
+          <input type="text" id="licenseKey" value="VIBE-PRO-8A9X-2C4M-11PQ" readonly>
+          <button class="btn-primary" onclick="const t = document.getElementById('licenseKey'); t.select(); navigator.clipboard.writeText(t.value); alert('복사되었습니다!');">복사하기</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
