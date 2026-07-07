@@ -146,8 +146,10 @@ if (checkoutSummary) {
   if (contactInput) contactInput.value = phone;
 }
 
-// ── 카카오 로그인 / 마이페이지 공통 ──────────────────────────────────
-const KAKAO_JS_KEY = "3c957621bd7c1f5af6d724a24f46a973";
+// ── 카카오 로그인(OAuth) / 이메일 회원가입·로그인 공통 ─────────────────
+// TODO: 카카오 개발자센터에서 발급받은 REST API 키로 교체 (JavaScript 키와는 다른 값)
+const KAKAO_REST_API_KEY = "REPLACE_WITH_KAKAO_REST_API_KEY";
+const KAKAO_REDIRECT_URI = `${window.location.origin}${window.location.pathname.replace(/[^/]+$/, "")}kakao-callback.html`;
 
 const PORTAL_TOKEN_KEY = "portalToken";
 const PORTAL_UNLINKED_KEY = "portalUnlinkedToken";
@@ -164,68 +166,270 @@ function portalFetch(path, options = {}) {
   });
 }
 
-// ── 로그인 페이지 (login.html에만 존재) ────────────────────────────────
-const kakaoLoginBtn = document.getElementById("kakaoLoginBtn");
+function goToKakaoAuthorize() {
+  const params = new URLSearchParams({
+    client_id: KAKAO_REST_API_KEY,
+    redirect_uri: KAKAO_REDIRECT_URI,
+    response_type: "code",
+    scope: "account_email",
+  });
+  window.location.href = `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;
+}
 
-if (kakaoLoginBtn) {
+// 카카오 버튼은 login.html(로그인), signup.html(회원가입), link.html(신규가입 전환) 세 곳에 있고
+// 동작은 전부 동일하게 카카오 인가 화면으로 이동하는 것뿐이다 — 이후 분기는 콜백 페이지가 처리.
+["kakaoLoginBtn", "kakaoSignupBtn", "kakaoSignupNewBtn"].forEach((id) => {
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener("click", goToKakaoAuthorize);
+});
+
+// ── 이메일 로그인 페이지 (login.html에만 존재) ──────────────────────────
+const loginForm = document.getElementById("loginForm");
+
+if (loginForm) {
+  const loginBtn = document.getElementById("loginBtn");
   const loginMessage = document.getElementById("loginMessage");
 
   function setLoginMessage(text, type) {
-    if (!loginMessage) return;
     loginMessage.textContent = text;
     loginMessage.className = "form-message" + (type ? ` ${type}` : "");
   }
 
-  if (window.Kakao && !window.Kakao.isInitialized()) {
-    window.Kakao.init(KAKAO_JS_KEY);
-  }
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
 
-  kakaoLoginBtn.addEventListener("click", () => {
-    if (!window.Kakao || !window.Kakao.isInitialized()) {
-      setLoginMessage("카카오 로그인 설정이 완료되지 않았습니다. 관리자에게 문의해 주세요.", "error");
-      return;
-    }
+    loginBtn.disabled = true;
+    setLoginMessage("로그인 중입니다...", "pending");
 
-    kakaoLoginBtn.disabled = true;
-    setLoginMessage("카카오 로그인 중입니다...", "pending");
+    try {
+      const res = await fetch(`${API_BASE}/api/portal/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
 
-    window.Kakao.Auth.login({
-      success: async (authObj) => {
-        try {
-          const res = await fetch(`${API_BASE}/api/portal/kakao/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ access_token: authObj.access_token }),
-          });
-          const data = await res.json();
-
-          if (!res.ok) {
-            throw new Error(data.error || "LOGIN_FAILED");
-          }
-
-          if (data.linked) {
-            localStorage.setItem(PORTAL_TOKEN_KEY, data.token);
-            localStorage.removeItem(PORTAL_UNLINKED_KEY);
-            window.location.href = "mypage.html";
-          } else {
-            localStorage.setItem(PORTAL_UNLINKED_KEY, data.token);
-            localStorage.setItem(PORTAL_NICKNAME_KEY, data.nickname || "");
-            window.location.href = "link.html";
-          }
-        } catch (err) {
+      if (!res.ok) {
+        if (data.error === "INVALID_CREDENTIALS") {
+          setLoginMessage("이메일 또는 비밀번호가 올바르지 않습니다.", "error");
+        } else if (data.error === "DISABLED") {
+          setLoginMessage("정지된 계정입니다. 관리자에게 문의해 주세요.", "error");
+        } else {
           setLoginMessage("로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
-          kakaoLoginBtn.disabled = false;
         }
-      },
-      fail: () => {
-        setLoginMessage("카카오 로그인이 취소되었습니다.", "error");
-        kakaoLoginBtn.disabled = false;
-      },
-    });
+        return;
+      }
+
+      localStorage.setItem(PORTAL_TOKEN_KEY, data.token);
+      window.location.href = "mypage.html";
+    } catch (err) {
+      setLoginMessage("로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally {
+      loginBtn.disabled = false;
+    }
   });
 }
 
-// ── 계정 연결 페이지 (link.html에만 존재) ──────────────────────────────
+// ── 이메일 회원가입 페이지 (signup.html에만 존재) ───────────────────────
+const signupForm = document.getElementById("signupForm");
+
+if (signupForm) {
+  const sendCodeBtn = document.getElementById("sendCodeBtn");
+  const verifyCodeBtn = document.getElementById("verifyCodeBtn");
+  const codeField = document.getElementById("codeField");
+  const codeStatus = document.getElementById("codeStatus");
+  const signupBtn = document.getElementById("signupBtn");
+  const signupMessage = document.getElementById("signupMessage");
+  const emailInput = document.getElementById("email");
+
+  let emailVerified = false;
+
+  function setCodeStatus(text, type) {
+    codeStatus.textContent = text;
+    codeStatus.className = "field-hint" + (type ? ` ${type}` : "");
+  }
+
+  function setSignupMessage(text, type) {
+    signupMessage.textContent = text;
+    signupMessage.className = "form-message" + (type ? ` ${type}` : "");
+  }
+
+  sendCodeBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    if (!email) {
+      setSignupMessage("이메일을 먼저 입력해 주세요.", "error");
+      return;
+    }
+
+    sendCodeBtn.disabled = true;
+    setSignupMessage("인증번호를 발송하는 중입니다...", "pending");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/portal/signup/request-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === "EMAIL_ALREADY_REGISTERED") {
+          setSignupMessage("이미 가입된 이메일입니다. 로그인해 주세요.", "error");
+        } else if (data.error === "INVALID_EMAIL") {
+          setSignupMessage("이메일 형식을 확인해 주세요.", "error");
+        } else {
+          setSignupMessage("인증번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+        }
+        return;
+      }
+
+      codeField.style.display = "";
+      setSignupMessage("인증번호를 발송했습니다. 이메일을 확인해 주세요.", "success");
+      emailVerified = false;
+    } catch (err) {
+      setSignupMessage("인증번호 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally {
+      sendCodeBtn.disabled = false;
+    }
+  });
+
+  verifyCodeBtn.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+    const code = document.getElementById("code").value.trim();
+    if (!code) return;
+
+    verifyCodeBtn.disabled = true;
+    setCodeStatus("확인 중입니다...", "");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/portal/signup/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, code }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        emailVerified = false;
+        if (data.error === "TOO_MANY_ATTEMPTS") {
+          setCodeStatus("시도 횟수를 초과했습니다. 인증번호를 다시 발송해 주세요.", "error");
+        } else {
+          setCodeStatus("인증번호가 올바르지 않습니다.", "error");
+        }
+        return;
+      }
+
+      emailVerified = true;
+      setCodeStatus("이메일 인증이 완료되었습니다.", "success");
+    } catch (err) {
+      setCodeStatus("확인에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally {
+      verifyCodeBtn.disabled = false;
+    }
+  });
+
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const email = emailInput.value.trim();
+    const password = document.getElementById("password").value;
+    const passwordConfirm = document.getElementById("passwordConfirm").value;
+    const agreeTerms = document.getElementById("agreeTerms").checked;
+
+    if (!agreeTerms) {
+      setSignupMessage("이용약관 및 개인정보처리방침에 동의해 주세요.", "error");
+      return;
+    }
+    if (!emailVerified) {
+      setSignupMessage("이메일 인증을 먼저 완료해 주세요.", "error");
+      return;
+    }
+    if (password.length < 8) {
+      setSignupMessage("비밀번호는 8자 이상이어야 합니다.", "error");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setSignupMessage("비밀번호가 일치하지 않습니다.", "error");
+      return;
+    }
+
+    signupBtn.disabled = true;
+    setSignupMessage("가입 처리 중입니다...", "pending");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/portal/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.error === "EMAIL_NOT_VERIFIED") {
+          setSignupMessage("이메일 인증을 먼저 완료해 주세요.", "error");
+        } else if (data.error === "EMAIL_ALREADY_REGISTERED") {
+          setSignupMessage("이미 가입된 이메일입니다. 로그인해 주세요.", "error");
+        } else {
+          setSignupMessage("가입에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+        }
+        return;
+      }
+
+      localStorage.setItem(PORTAL_TOKEN_KEY, data.token);
+      window.location.href = "mypage.html";
+    } catch (err) {
+      setSignupMessage("가입에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally {
+      signupBtn.disabled = false;
+    }
+  });
+}
+
+// ── 카카오 로그인 콜백 처리 (kakao-callback.html에만 존재) ──────────────
+const callbackMessage = document.getElementById("callbackMessage");
+
+if (callbackMessage) {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+
+  if (!code) {
+    callbackMessage.textContent = "카카오 로그인이 취소되었습니다.";
+    setTimeout(() => { window.location.href = "login.html"; }, 1500);
+  } else {
+    fetch(`${API_BASE}/api/portal/kakao/callback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          callbackMessage.textContent = "카카오 로그인에 실패했습니다. 다시 시도해 주세요.";
+          setTimeout(() => { window.location.href = "login.html"; }, 1500);
+          return;
+        }
+
+        if (data.status === "linked") {
+          localStorage.setItem(PORTAL_TOKEN_KEY, data.token);
+          localStorage.removeItem(PORTAL_UNLINKED_KEY);
+          window.location.href = "mypage.html";
+        } else {
+          localStorage.setItem(PORTAL_UNLINKED_KEY, data.token);
+          localStorage.setItem(PORTAL_NICKNAME_KEY, data.nickname || "");
+          window.location.href = "link.html";
+        }
+      })
+      .catch(() => {
+        callbackMessage.textContent = "카카오 로그인에 실패했습니다. 다시 시도해 주세요.";
+        setTimeout(() => { window.location.href = "login.html"; }, 1500);
+      });
+  }
+}
+
+// ── 계정 연결 / 신규가입 선택 페이지 (link.html에만 존재) ───────────────
 const linkForm = document.getElementById("linkForm");
 
 if (linkForm) {
@@ -281,6 +485,42 @@ if (linkForm) {
       setLinkMessage("연결에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
     }
   });
+
+  const kakaoSignupNewBtn = document.getElementById("kakaoSignupNewBtn");
+  if (kakaoSignupNewBtn) {
+    const newAccountMessage = document.getElementById("newAccountMessage");
+    function setNewAccountMessage(text, type) {
+      newAccountMessage.textContent = text;
+      newAccountMessage.className = "form-message" + (type ? ` ${type}` : "");
+    }
+
+    kakaoSignupNewBtn.addEventListener("click", async () => {
+      kakaoSignupNewBtn.disabled = true;
+      setNewAccountMessage("가입 처리 중입니다...", "pending");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/portal/kakao/signup`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${unlinkedToken}` },
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setNewAccountMessage("가입에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+          return;
+        }
+
+        localStorage.setItem(PORTAL_TOKEN_KEY, data.token);
+        localStorage.removeItem(PORTAL_UNLINKED_KEY);
+        localStorage.removeItem(PORTAL_NICKNAME_KEY);
+        window.location.href = "mypage.html";
+      } catch (err) {
+        setNewAccountMessage("가입에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+      } finally {
+        kakaoSignupNewBtn.disabled = false;
+      }
+    });
+  }
 }
 
 // ── 마이페이지 사이드바 + 로그아웃 (mypage.html, profile.html 공통) ────

@@ -8,19 +8,27 @@
 </head>
 <body class="bg-light login-body">
   <div class="login-container">
-    <div class="login-box">
-      <a href="index.html" class="login-logo">VIBE <span>PropTech</span></a>
-      <h2>계정 연결이 필요합니다</h2>
-      <p class="login-desc"><span id="linkNickname">고객</span>님, 반갑습니다.<br>기존에 신청/발급받으신 라이선스와 연결하려면 전화번호를 입력해 주세요.</p>
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>거의 다 됐습니다</h2>
+      </div>
+      <div class="auth-card-body">
+        <p class="login-desc"><span id="linkNickname">고객</span>님, 반갑습니다.<br>이전에 구매하신 라이선스가 있다면 전화번호로 연결하고, 처음이시면 새 계정을 만들어 주세요.</p>
 
-      <form id="linkForm">
-        <div class="field"><label for="phone">전화번호</label><input type="tel" id="phone" required placeholder="010-1234-5678"></div>
-        <button type="submit" class="btn-submit" style="margin-top: 12px;">연결하기</button>
-      </form>
-      <p id="linkMessage" class="form-message" role="status"></p>
+        <form id="linkForm">
+          <div class="field"><label for="phone">전화번호</label><input type="tel" id="phone" required placeholder="010-1234-5678"></div>
+          <button type="submit" class="btn-submit" style="margin-top: 8px;">기존 라이선스와 연결하기</button>
+        </form>
+        <p id="linkMessage" class="form-message" role="status"></p>
 
-      <div class="login-footer-links">
-        <span>아직 라이선스가 없으신가요?</span> <a href="index.html#apply-form">솔루션 신청</a>
+        <div class="auth-divider"><span>또는</span></div>
+
+        <button type="button" id="kakaoSignupNewBtn" class="btn-outline-accent" style="width:100%; padding:14px;">새 계정으로 가입하기</button>
+        <p id="newAccountMessage" class="form-message" role="status"></p>
+
+        <div class="login-footer-links">
+          <span>아직 라이선스가 없으신가요?</span> <a href="index.html#apply-form">솔루션 신청</a>
+        </div>
       </div>
     </div>
   </div>

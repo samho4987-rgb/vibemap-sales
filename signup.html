@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>바이브 프롭테크 솔루션 — 회원가입</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="bg-light login-body">
+  <div class="login-container">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>회원가입</h2>
+      </div>
+      <div class="auth-card-body">
+        <form id="signupForm">
+          <div class="field"><label for="name">이름</label><input type="text" id="name" required placeholder="이름을 입력하세요"></div>
+
+          <div class="field">
+            <label for="email">이메일</label>
+            <div class="field-with-btn">
+              <input type="email" id="email" required placeholder="이메일을 입력하세요">
+              <button type="button" id="sendCodeBtn" class="btn-outline-accent">인증번호 발송</button>
+            </div>
+          </div>
+
+          <div class="field" id="codeField" style="display:none;">
+            <label for="code">인증번호</label>
+            <div class="field-with-btn">
+              <input type="text" id="code" inputmode="numeric" maxlength="6" placeholder="6자리 인증번호">
+              <button type="button" id="verifyCodeBtn" class="btn-outline-accent">확인</button>
+            </div>
+            <span id="codeStatus" class="field-hint"></span>
+          </div>
+
+          <div class="field"><label for="password">비밀번호</label><input type="password" id="password" required placeholder="비밀번호를 입력하세요 (8자 이상)"></div>
+          <div class="field"><label for="passwordConfirm">비밀번호 확인</label><input type="password" id="passwordConfirm" required placeholder="비밀번호를 다시 입력하세요"></div>
+
+          <label class="checkbox-row"><input type="checkbox" id="agreeTerms" required> 이용약관 및 개인정보처리방침에 동의합니다</label>
+
+          <p id="signupMessage" class="form-message" role="status"></p>
+
+          <button type="submit" id="signupBtn" class="btn-submit" style="margin-top: 8px;">회원가입</button>
+        </form>
+
+        <div class="auth-divider"><span>또는</span></div>
+
+        <button type="button" id="kakaoSignupBtn" class="btn-kakao">
+          <span class="kakao-icon">💬</span> 카카오 회원가입
+        </button>
+
+        <div class="login-footer-links">
+          <span>이미 계정이 있으신가요?</span> <a href="login.html">로그인</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
