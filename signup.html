@@ -33,7 +33,11 @@
             <span id="codeStatus" class="field-hint"></span>
           </div>
 
-          <div class="field"><label for="password">비밀번호</label><input type="password" id="password" required placeholder="비밀번호를 입력하세요 (8자 이상)"></div>
+          <div class="field">
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" required placeholder="비밀번호를 입력하세요" minlength="8">
+            <span class="field-hint">8자 이상 입력해 주세요</span>
+          </div>
           <div class="field"><label for="passwordConfirm">비밀번호 확인</label><input type="password" id="passwordConfirm" required placeholder="비밀번호를 다시 입력하세요"></div>
 
           <label class="checkbox-row"><input type="checkbox" id="agreeTerms" required> 이용약관 및 개인정보처리방침에 동의합니다</label>

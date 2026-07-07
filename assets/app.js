@@ -154,6 +154,21 @@ const PORTAL_TOKEN_KEY = "portalToken";
 const PORTAL_UNLINKED_KEY = "portalUnlinkedToken";
 const PORTAL_NICKNAME_KEY = "portalNickname";
 
+// 로그인/회원가입 페이지인데 이미 로그인되어 있으면 바로 마이페이지로 보낸다.
+if (
+  (document.getElementById("loginForm") || document.getElementById("signupForm")) &&
+  localStorage.getItem(PORTAL_TOKEN_KEY)
+) {
+  window.location.href = "mypage.html";
+}
+
+// 랜딩 페이지 네비게이션이 로그인 상태를 반영하도록.
+const navAuthLink = document.getElementById("navAuthLink");
+if (navAuthLink && localStorage.getItem(PORTAL_TOKEN_KEY)) {
+  navAuthLink.textContent = "마이페이지";
+  navAuthLink.href = "mypage.html";
+}
+
 function portalFetch(path, options = {}) {
   const token = localStorage.getItem(PORTAL_TOKEN_KEY);
   return fetch(`${API_BASE}${path}`, {
@@ -602,11 +617,55 @@ if (profilePortal) {
 
       profilePortal.innerHTML = `
         <h3 class="profile-section-title">내 정보</h3>
-        <div class="field"><label>성함</label><input type="text" value="${me.name || ""}" disabled></div>
-        <div class="field"><label>전화번호</label><input type="tel" value="${me.phone || ""}" disabled></div>
-        <div class="field"><label>아이디</label><input type="text" value="${me.login_id || ""}" disabled></div>
-        <p class="text-muted" style="margin-top: 8px;">※ 정보 변경 기능은 준비 중입니다. 변경이 필요하시면 상담 문의로 연락해 주세요.</p>
+        <form id="profileForm">
+          <div class="field"><label for="profileName">성함</label><input type="text" id="profileName" value="${me.name || ""}"></div>
+          <div class="field"><label for="profilePhone">전화번호</label><input type="tel" id="profilePhone" value="${me.phone || ""}"></div>
+          <div class="field"><label>아이디</label><input type="text" value="${me.login_id || ""}" disabled></div>
+          <div class="field"><label for="profileBrokerRegNumber">중개업등록번호</label><input type="text" id="profileBrokerRegNumber" value="${me.broker_reg_number || ""}" placeholder="예: 12345-2026-00001"></div>
+          <div class="field"><label for="profileNaverListingId">네이버 매물 아이디</label><input type="text" id="profileNaverListingId" value="${me.naver_listing_id || ""}"></div>
+          <p id="profileMessage" class="form-message" role="status"></p>
+          <button type="submit" id="profileSaveBtn" class="btn-primary" style="padding: 12px 24px;">변경사항 저장</button>
+        </form>
       `;
+
+      const profileForm = document.getElementById("profileForm");
+      const profileMessage = document.getElementById("profileMessage");
+      const profileSaveBtn = document.getElementById("profileSaveBtn");
+
+      function setProfileMessage(text, type) {
+        profileMessage.textContent = text;
+        profileMessage.className = "form-message" + (type ? ` ${type}` : "");
+      }
+
+      profileForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        profileSaveBtn.disabled = true;
+        setProfileMessage("저장하는 중입니다...", "pending");
+
+        try {
+          const res = await portalFetch("/api/portal/me", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: document.getElementById("profileName").value.trim(),
+              phone: document.getElementById("profilePhone").value.trim(),
+              broker_reg_number: document.getElementById("profileBrokerRegNumber").value.trim(),
+              naver_listing_id: document.getElementById("profileNaverListingId").value.trim(),
+            }),
+          });
+
+          if (!res.ok) throw new Error("REQUEST_FAILED");
+
+          const updated = await res.json();
+          renderSidebar(updated);
+          setProfileMessage("저장되었습니다.", "success");
+        } catch (err) {
+          setProfileMessage("저장에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+        } finally {
+          profileSaveBtn.disabled = false;
+        }
+      });
     })
     .catch(() => {
       if (profilePortal) {
