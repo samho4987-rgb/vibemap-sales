@@ -181,12 +181,11 @@ function portalFetch(path, options = {}) {
 }
 
 function goToKakaoAuthorize() {
-  // account_email 등 개인정보 동의항목은 카카오 비즈니스 인증이 있어야 요청 가능하다.
-  // 인증 전까지는 scope 없이 kakao_id만 받고, 계정 연결은 전화번호(link.html)로 처리한다.
   const params = new URLSearchParams({
     client_id: KAKAO_REST_API_KEY,
     redirect_uri: KAKAO_REDIRECT_URI,
     response_type: "code",
+    scope: "account_email",
   });
   window.location.href = `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;
 }
