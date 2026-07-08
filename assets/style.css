@@ -137,8 +137,43 @@ body { padding-top: 70px; line-height: 1.6; }
 .btn-outline { padding: 6px 12px; border: 1px solid var(--line); background: white; border-radius: 6px; cursor: pointer; }
 .btn-sm { font-size: 0.85rem; }
 
+/* 상품 상세 페이지 */
+.product-detail-header { margin-bottom: 32px; }
+.product-detail-header .price-tag { font-size: 1.8rem; }
+.product-detail-list { list-style: none; display: flex; flex-direction: column; gap: 14px; margin: 24px 0 32px; }
+.product-detail-list li { padding-left: 28px; position: relative; color: var(--ink); line-height: 1.6; }
+.product-detail-list li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+.back-link { display: inline-block; margin-bottom: 20px; color: var(--muted); text-decoration: none; font-size: 0.9rem; }
+.back-link:hover { color: var(--accent); }
+
+/* 구매/체험 모달 */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-box { background: #fff; border-radius: 16px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); }
+.modal-header { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: #fff; padding: 24px 28px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h2 { font-size: 1.3rem; font-weight: 800; }
+.modal-close { background: rgba(255,255,255,0.15); border: none; color: #fff; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; line-height: 1; }
+.modal-body { padding: 28px; }
+.modal-summary { background: var(--bg); border-radius: 10px; padding: 18px; margin-bottom: 20px; }
+.modal-summary h3 { font-size: 1.05rem; margin-bottom: 12px; }
+.modal-summary-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 4px 0; color: var(--muted); }
+.modal-summary-row strong { color: var(--accent); font-weight: 800; }
+.bank-notice-box { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 8px 0 20px; }
+.bank-notice-box h4 { font-size: 0.95rem; margin-bottom: 10px; }
+.bank-notice-text { color: var(--muted); font-size: 0.82rem; margin-top: 10px; line-height: 1.6; }
+.modal-actions { display: flex; gap: 10px; }
+.modal-actions .btn-outline-accent { flex: 1; }
+.modal-actions .btn-submit { flex: 2; margin-top: 0; }
+
+/* 사이트 푸터 */
+.footer-inner { display: flex; gap: 20px; align-items: flex-start; padding: 0 24px; }
+.footer-logo { width: 110px; height: auto; object-fit: contain; flex-shrink: 0; }
+.footer-info p { font-size: 0.8rem; line-height: 1.8; margin: 0; }
+.footer-brand-name { font-weight: 700; color: #e2e8f0; font-size: 0.95rem; margin-bottom: 4px !important; }
+.footer-copy { margin-top: 8px !important; color: #64748b; }
+
 @media (max-width: 768px) {
   .nav-menu { display: none; }
   .checkout-grid { grid-template-columns: 1fr; }
   .mypage-wrapper { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; align-items: center; text-align: center; }
 }

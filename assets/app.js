@@ -38,9 +38,7 @@ if (grid && productSelect) {
         <button type="button" class="btn-card btn-card-primary" data-key="${p.key}">${pending ? "출시 알림 신청" : "신청하기"}</button>
       `;
       card.querySelector("button").addEventListener("click", () => {
-        productSelect.value = p.key;
-        document.getElementById("apply-form").scrollIntoView({ behavior: "smooth" });
-        document.getElementById("name").focus();
+        window.location.href = `product.html?key=${encodeURIComponent(p.key)}`;
       });
       grid.appendChild(card);
 
@@ -689,4 +687,236 @@ if (profilePortal) {
         profilePortal.innerHTML = '<p class="loading">정보를 불러오지 못했습니다. 새로고침해 주세요.</p>';
       }
     });
+}
+
+// ── 사이트 푸터 (footer id="siteFooter"가 있는 모든 페이지) ─────────────
+const siteFooter = document.getElementById("siteFooter");
+
+if (siteFooter) {
+  // TODO: 소재지/사업자등록번호/통신판매업신고번호는 더미값 — 실제 값으로 교체 필요
+  siteFooter.innerHTML = `
+    <div class="container footer-inner">
+      <img src="assets/logo.png" alt="바이브 프롭테크" class="footer-logo" onerror="this.style.display='none'">
+      <div class="footer-info">
+        <p>소재지: 서울특별시 강남구 테헤란로 123, 4층 (더미 주소 — 교체 필요)</p>
+        <p>사업자등록번호: 000-00-00000 (더미) · 통신판매업신고번호: 제2026-서울강남-0000호 (더미)</p>
+        <p>대표자: 이정훈 · 개인정보보호책임자: 이정훈</p>
+        <p class="footer-copy">© 2026 VIBE PropTech. All Rights Reserved. 상담문의: info@example.com</p>
+      </div>
+    </div>
+  `;
+}
+
+// ── 무료 체험 상품 정보 (products.json과 별개, 코드에 직접 정의) ─────────
+const TRIAL_PRODUCTS = {
+  trial_map: {
+    name: "바이브 지도 체험판",
+    tagline: "3일간 무료로 체험해보세요",
+    detail: [
+      "정식판과 동일한 지도 기반 매물 뷰어를 체험할 수 있습니다.",
+      "매물 자동 수집(크롤링) 및 고급 분석 기능은 체험판에서 제한됩니다.",
+      "체험 기간은 신청 후 3일간이며, 이후 자동으로 기능이 제한됩니다.",
+      "체험 중 정식 이용을 원하시면 언제든 구매하실 수 있습니다.",
+    ],
+    downloadUrl: "https://samho4987-rgb.github.io/vibemap-releases/",
+    downloadLabel: "지금 다운로드",
+  },
+  trial_news: {
+    name: "실시간 뉴스 수집 프로그램",
+    tagline: "출시 준비 중 — 지금 신청하시면 가장 먼저 안내드립니다",
+    detail: [
+      "키워드 기반으로 실시간 뉴스를 자동 수집하는 프로그램입니다.",
+      "현재 개발 중이며, 출시되는 대로 신청자분들께 3일 무료 체험을 가장 먼저 안내드립니다.",
+    ],
+    downloadUrl: null,
+  },
+};
+
+// ── 상품 상세 페이지 (product.html에만 존재) ────────────────────────────
+const productDetail = document.getElementById("product-detail");
+
+if (productDetail) {
+  const key = new URLSearchParams(window.location.search).get("key") || "";
+
+  loadProducts().then(() => {
+    const product = products.find((p) => p.key === key);
+    if (!product) {
+      productDetail.innerHTML = '<p class="loading">존재하지 않는 상품입니다. <a href="index.html">홈으로 돌아가기</a></p>';
+      return;
+    }
+
+    const pending = product.status === "pending";
+    const detailItems = (product.detail || []).map((d) => `<li>${d}</li>`).join("");
+
+    productDetail.innerHTML = `
+      <a href="index.html#products" class="back-link">← 상품 목록으로</a>
+      <div class="product-detail-header">
+        <h1>${product.name}</h1>
+        <div class="price-tag">${product.price}</div>
+        <p style="color:var(--muted);">${product.description}</p>
+      </div>
+      <ul class="product-detail-list">${detailItems}</ul>
+      <button type="button" id="openPurchaseBtn" class="btn-primary" style="width:100%;">
+        ${pending ? "출시 알림 신청" : "구매하기"}
+      </button>
+    `;
+
+    document.getElementById("openPurchaseBtn").addEventListener("click", () => {
+      openPurchaseModal(product);
+    });
+  }).catch(() => {
+    productDetail.innerHTML = '<p class="loading">상품 정보를 불러오지 못했습니다. 새로고침해 주세요.</p>';
+  });
+}
+
+// ── 구매 모달 (product.html에만 존재) ───────────────────────────────────
+const purchaseModalOverlay = document.getElementById("purchaseModalOverlay");
+
+if (purchaseModalOverlay) {
+  // TODO: 실제 입금 계좌로 교체
+  const BANK_INFO = {
+    bank: "OO은행",
+    accountNumber: "000-000000-00-000",
+    holder: "바이브프롭테크",
+  };
+
+  const purchaseForm = document.getElementById("purchaseForm");
+  const purchaseSubmitBtn = document.getElementById("purchaseSubmitBtn");
+  const purchaseMessage = document.getElementById("purchaseMessage");
+  let currentProduct = null;
+
+  function setPurchaseMessage(text, type) {
+    purchaseMessage.textContent = text;
+    purchaseMessage.className = "form-message" + (type ? ` ${type}` : "");
+  }
+
+  window.openPurchaseModal = function (product) {
+    currentProduct = product;
+    const pending = product.status === "pending";
+    document.getElementById("purchaseModalTitle").textContent = pending ? "출시 알림 신청" : "프로그램 구매";
+    document.getElementById("purchaseProductName").textContent = product.name;
+    document.getElementById("purchasePeriod").textContent = pending ? "-" : (product.period || "1개월");
+    document.getElementById("purchasePrice").textContent = product.price;
+    document.getElementById("purchaseBankName").textContent = BANK_INFO.bank;
+    document.getElementById("purchaseBankAccount").textContent = BANK_INFO.accountNumber;
+    document.getElementById("purchaseBankHolder").textContent = BANK_INFO.holder;
+    document.getElementById("purchaseSubmitBtn").textContent = pending ? "신청하기" : "구매하기";
+    setPurchaseMessage("", "");
+    purchaseForm.reset();
+    purchaseModalOverlay.style.display = "flex";
+  };
+
+  function closePurchaseModal() {
+    purchaseModalOverlay.style.display = "none";
+  }
+
+  document.getElementById("purchaseModalClose").addEventListener("click", closePurchaseModal);
+  document.getElementById("purchaseCancelBtn").addEventListener("click", closePurchaseModal);
+  purchaseModalOverlay.addEventListener("click", (e) => {
+    if (e.target === purchaseModalOverlay) closePurchaseModal();
+  });
+
+  purchaseForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentProduct) return;
+
+    const name = document.getElementById("purchaseName").value.trim();
+    const phone = document.getElementById("purchasePhone").value.trim();
+
+    purchaseSubmitBtn.disabled = true;
+    setPurchaseMessage("접수 중입니다...", "pending");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/apply`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, email: "", product: currentProduct.key, memo: "" }),
+      });
+
+      if (!res.ok) throw new Error("REQUEST_FAILED");
+
+      setPurchaseMessage("접수되었습니다. 입금 확인 후 순차적으로 안내드립니다.", "success");
+      purchaseSubmitBtn.style.display = "none";
+      document.getElementById("purchaseCancelBtn").textContent = "닫기";
+    } catch (err) {
+      setPurchaseMessage("접수에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally {
+      purchaseSubmitBtn.disabled = false;
+    }
+  });
+}
+
+// ── 무료 체험 신청 페이지 (trial.html에만 존재) ─────────────────────────
+const trialDetail = document.getElementById("trial-detail");
+
+if (trialDetail) {
+  const key = new URLSearchParams(window.location.search).get("key") || "";
+  const trial = TRIAL_PRODUCTS[key];
+
+  if (!trial) {
+    trialDetail.innerHTML = '<p class="loading">존재하지 않는 체험판입니다. <a href="index.html">홈으로 돌아가기</a></p>';
+  } else {
+    const detailItems = trial.detail.map((d) => `<li>${d}</li>`).join("");
+    trialDetail.innerHTML = `
+      <a href="index.html" class="back-link">← 홈으로</a>
+      <div class="product-detail-header">
+        <h1>${trial.name}</h1>
+        <p style="color:var(--accent); font-weight:700;">${trial.tagline}</p>
+      </div>
+      <ul class="product-detail-list">${detailItems}</ul>
+      <div class="form-box" id="trialFormBox">
+        <form id="trialForm">
+          <div class="field"><label for="trialName">이름</label><input type="text" id="trialName" required placeholder="이름을 입력하세요"></div>
+          <div class="field"><label for="trialPhone">휴대폰 번호</label><input type="tel" id="trialPhone" required placeholder="010-1234-5678"></div>
+          <div class="field"><label for="trialEmail">이메일 (선택)</label><input type="email" id="trialEmail" placeholder="example@naver.com"></div>
+          <label class="checkbox-row"><input type="checkbox" id="trialAgree" required> 개인정보 수집 및 이용에 동의합니다 (필수)</label>
+          <p id="trialMessage" class="form-message" role="status"></p>
+          <button type="submit" id="trialSubmitBtn" class="btn-submit">체험 신청하기</button>
+        </form>
+      </div>
+    `;
+
+    const trialForm = document.getElementById("trialForm");
+    const trialSubmitBtn = document.getElementById("trialSubmitBtn");
+    const trialMessage = document.getElementById("trialMessage");
+
+    function setTrialMessage(text, type) {
+      trialMessage.textContent = text;
+      trialMessage.className = "form-message" + (type ? ` ${type}` : "");
+    }
+
+    trialForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("trialName").value.trim();
+      const phone = document.getElementById("trialPhone").value.trim();
+      const email = document.getElementById("trialEmail").value.trim();
+
+      trialSubmitBtn.disabled = true;
+      setTrialMessage("접수 중입니다...", "pending");
+
+      try {
+        const res = await fetch(`${API_BASE}/api/apply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, email, product: key, memo: "체험 신청" }),
+        });
+
+        if (!res.ok) throw new Error("REQUEST_FAILED");
+
+        const box = document.getElementById("trialFormBox");
+        if (trial.downloadUrl) {
+          box.innerHTML = `
+            <p class="form-message success" style="margin-bottom:16px;">체험 신청이 접수되었습니다!</p>
+            <a href="${trial.downloadUrl}" target="_blank" rel="noopener" class="btn-submit" style="display:block; text-align:center; text-decoration:none;">${trial.downloadLabel}</a>
+          `;
+        } else {
+          box.innerHTML = `<p class="form-message success">신청이 접수되었습니다. 출시되면 등록하신 연락처로 가장 먼저 안내드립니다.</p>`;
+        }
+      } catch (err) {
+        setTrialMessage("접수에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+        trialSubmitBtn.disabled = false;
+      }
+    });
+  }
 }

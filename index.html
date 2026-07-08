@@ -15,6 +15,7 @@
         <li><a href="#features">주요특징</a></li>
         <li><a href="#preview">프로그램 미리보기</a></li>
         <li><a href="#products">상품안내</a></li>
+        <li><a href="#trials">무료체험</a></li>
         <li><a href="#faq">자주묻는질문</a></li>
       </ul>
       <a href="login.html" id="navAuthLink" class="btn-nav" style="border:none; color:var(--muted); margin-right:-16px;">로그인</a>
@@ -96,6 +97,27 @@
     </div>
   </section>
 
+  <section id="trials" class="section bg-light">
+    <div class="container">
+      <h2 class="section-title text-center">무료 <span>체험하기</span></h2>
+      <p class="section-subtitle text-center">구매 전에 먼저 체험해보세요.</p>
+      <div class="product-grid">
+        <div class="product-card">
+          <h3>바이브 지도 체험판</h3>
+          <div class="price-tag">3일 무료</div>
+          <p class="desc">정식판과 동일한 지도 뷰어를 체험할 수 있습니다. 매물 자동 수집 등 고급 기능은 제한됩니다.</p>
+          <button type="button" class="btn-card btn-card-primary" onclick="location.href='trial.html?key=trial_map'">체험 신청하기</button>
+        </div>
+        <div class="product-card pending">
+          <h3>실시간 뉴스 수집 프로그램</h3>
+          <div class="price-tag">출시 준비 중</div>
+          <p class="desc">키워드 기반 실시간 뉴스 자동 수집 프로그램. 출시되면 신청자분들께 가장 먼저 안내드립니다.</p>
+          <button type="button" class="btn-card" onclick="location.href='trial.html?key=trial_news'">출시 알림 신청</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section id="faq" class="section bg-light">
     <div class="container">
       <h2 class="section-title text-center">자주 묻는 <span>질문 (FAQ)</span></h2>
@@ -139,12 +161,7 @@
     </div>
   </section>
 
-  <footer class="site-footer">
-    <div class="container text-center">
-      <p class="footer-brand">바이브 부동산 솔루션 — 20년 실무 노하우 PropTech</p>
-      <p class="footer-copy">© 2026 VIBE PropTech. All Rights Reserved. 상담문의: info@example.com</p>
-    </div>
-  </footer>
+  <footer class="site-footer" id="siteFooter"></footer>
   <script src="assets/app.js"></script>
 </body>
 </html>
