@@ -190,9 +190,11 @@ function goToKakaoAuthorize() {
   window.location.href = `https://kauth.kakao.com/oauth/authorize?${params.toString()}`;
 }
 
-// 카카오 버튼은 login.html(로그인), signup.html(회원가입), link.html(신규가입 전환) 세 곳에 있고
+// 카카오 버튼은 login.html(로그인), signup.html(회원가입) 두 곳에 있고
 // 동작은 전부 동일하게 카카오 인가 화면으로 이동하는 것뿐이다 — 이후 분기는 콜백 페이지가 처리.
-["kakaoLoginBtn", "kakaoSignupBtn", "kakaoSignupNewBtn"].forEach((id) => {
+// link.html의 kakaoSignupNewBtn은 이미 카카오 인증을 마친 뒤(unlinked 토큰 보유) 신규가입을
+// 확정하는 버튼이라 별도 로직(아래 link.html 섹션)에서 처리한다.
+["kakaoLoginBtn", "kakaoSignupBtn"].forEach((id) => {
   const btn = document.getElementById(id);
   if (btn) btn.addEventListener("click", goToKakaoAuthorize);
 });
@@ -348,11 +350,16 @@ if (signupForm) {
     e.preventDefault();
 
     const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
     const email = emailInput.value.trim();
     const password = document.getElementById("password").value;
     const passwordConfirm = document.getElementById("passwordConfirm").value;
     const agreeTerms = document.getElementById("agreeTerms").checked;
 
+    if (!phone) {
+      setSignupMessage("전화번호를 입력해 주세요.", "error");
+      return;
+    }
     if (!agreeTerms) {
       setSignupMessage("이용약관 및 개인정보처리방침에 동의해 주세요.", "error");
       return;
@@ -377,7 +384,7 @@ if (signupForm) {
       const res = await fetch(`${API_BASE}/api/portal/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, phone, email, password }),
       });
       const data = await res.json();
 
@@ -509,13 +516,23 @@ if (linkForm) {
     }
 
     kakaoSignupNewBtn.addEventListener("click", async () => {
+      const phone = document.getElementById("phone").value.trim();
+      if (!phone) {
+        setNewAccountMessage("전화번호를 입력해 주세요.", "error");
+        return;
+      }
+
       kakaoSignupNewBtn.disabled = true;
       setNewAccountMessage("가입 처리 중입니다...", "pending");
 
       try {
         const res = await fetch(`${API_BASE}/api/portal/kakao/signup`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${unlinkedToken}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${unlinkedToken}`,
+          },
+          body: JSON.stringify({ phone }),
         });
         const data = await res.json();
 
